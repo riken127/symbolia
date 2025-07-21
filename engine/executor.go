@@ -72,7 +72,9 @@ func (e *Executor) ExecuteInvocation(inv types.Invocation) error {
 			return fmt.Errorf("opcode %d not implemented", instr.OpCode)
 		}
 
-		resolvedArgs := e.resolveArgs(instr.Args, e.ctx.Symbols)
+		preserveReferences := handler.Name() == "store"
+
+		resolvedArgs := e.resolveArgs(instr.Args, e.ctx.Symbols, preserveReferences)
 		resolvedInstr := types.Instruction{
 			OpCode: instr.OpCode,
 			Args:   resolvedArgs,
@@ -87,21 +89,54 @@ func (e *Executor) ExecuteInvocation(inv types.Invocation) error {
 		e.ctx.PC = nextPC
 	}
 
+	if inv.PipeTo != nil {
+		pipeToID, ok := inv.PipeTo.(int)
+		if !ok {
+			return fmt.Errorf("pipeTo argument is not int, got: %T", inv.PipeTo)
+		}
+
+		if e.ctx.Stack.Len() == 0 {
+			return fmt.Errorf("pipeTo failed: stack is empty, no value to pass")
+		}
+
+		finalValue := e.ctx.Stack.Pop()
+
+		pipeToInv := types.Invocation{
+			FunctionID: pipeToID,
+			Args:       []any{finalValue},
+		}
+
+		return e.ExecuteInvocation(pipeToInv)
+	}
+
 	return nil
 }
 
-// resolveArgs resolves a slice of arguments by replacing string keys with their corresponding values from the symbol table.
-func (e *Executor) resolveArgs(args []any, symbolTable map[string]any) []any {
+// resolveArgs resolves the arguments based on the symbol table.
+// Ensures that symbol names remain intact for specific instructions like `store`.
+func (e *Executor) resolveArgs(args []any, symbolTable map[string]any, preserveReferences bool) []any {
 	resolved := make([]any, len(args))
+
 	for i, arg := range args {
-		if symName, ok := arg.(string); ok {
-			if val, found := symbolTable[symName]; found {
-				resolved[i] = val
-				continue
+		switch v := arg.(type) {
+		case string:
+			if preserveReferences {
+				// For instructions like `store`, keep the symbol name as-is.
+				resolved[i] = v
+			} else {
+				// Resolve symbol value from the table if found.
+				if val, found := symbolTable[v]; found {
+					resolved[i] = val
+				} else {
+					resolved[i] = fmt.Sprintf("UndefinedSymbol: %s", v)
+				}
 			}
+		default:
+			// Retain other types (e.g., int, float64) as-is.
+			resolved[i] = v
 		}
-		resolved[i] = arg
 	}
+
 	return resolved
 }
 
