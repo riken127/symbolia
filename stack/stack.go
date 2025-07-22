@@ -66,3 +66,7 @@ func (s *Stack) PeekNFromTop(n int) any {
 	}
 	return s.data[idx]
 }
+
+func (s *Stack) Clear() {
+	s.data = s.data[:0]
+}
