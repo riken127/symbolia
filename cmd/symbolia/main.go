@@ -1,11 +1,14 @@
 package main
 
 import (
+	"github.com/riken127/symbolia/opcode/conditional"
+	"github.com/riken127/symbolia/opcode/flow"
+	"github.com/riken127/symbolia/opcode/math"
+	"github.com/riken127/symbolia/opcode/misc"
 	"log"
 	"time"
 
 	"github.com/riken127/symbolia/engine"
-	"github.com/riken127/symbolia/opcode"
 	"github.com/riken127/symbolia/types"
 )
 
@@ -16,19 +19,19 @@ func main() {
 		Symbols: []string{"counter"},
 		Stack: []types.Instruction{
 			// Loop start:
-			{OpCode: int(opcode.PushIdentifier), Args: []any{"counter"}},   // 0: push counter
-			{OpCode: int(opcode.PushIdentifier), Args: []any{1_000_000.0}}, // 1: push limit
-			{OpCode: int(opcode.EqualIdentifier)},                          // 2: equal ?
-			{OpCode: int(opcode.JumpIfIdentifier), Args: []any{9}},         // 3: jump if equal → end loop
+			{OpCode: int(misc.PushIdentifier), Args: []any{"counter"}},   // 0: push counter
+			{OpCode: int(misc.PushIdentifier), Args: []any{1_000_000.0}}, // 1: push limit
+			{OpCode: int(conditional.EqualIdentifier)},                   // 2: equal ?
+			{OpCode: int(flow.JumpIfIdentifier), Args: []any{9}},         // 3: jump if equal → end loop
 
-			{OpCode: int(opcode.PushIdentifier), Args: []any{"counter"}},  // 4: push counter
-			{OpCode: int(opcode.PushIdentifier), Args: []any{1.0}},        // 5: push 1
-			{OpCode: int(opcode.AddIdentifier)},                           // 6: counter + 1
-			{OpCode: int(opcode.StoreIdentifier), Args: []any{"counter"}}, // 7: store counter
-			{OpCode: int(opcode.JumpIdentifier), Args: []any{0}},          // 8: jump to loop start
+			{OpCode: int(misc.PushIdentifier), Args: []any{"counter"}},  // 4: push counter
+			{OpCode: int(misc.PushIdentifier), Args: []any{1.0}},        // 5: push 1
+			{OpCode: int(math.AddIdentifier)},                           // 6: counter + 1
+			{OpCode: int(misc.StoreIdentifier), Args: []any{"counter"}}, // 7: store counter
+			{OpCode: int(flow.JumpIdentifier), Args: []any{0}},          // 8: jump to loop start
 
 			// End loop: push final counter value
-			{OpCode: int(opcode.PushIdentifier), Args: []any{"counter"}}, // 9: push counter for pipe
+			{OpCode: int(misc.PushIdentifier), Args: []any{"counter"}}, // 9: push counter for pipe
 		},
 	}
 
@@ -37,10 +40,10 @@ func main() {
 		ID:      2,
 		Symbols: []string{"value"},
 		Stack: []types.Instruction{
-			{OpCode: int(opcode.PushIdentifier), Args: []any{"value"}}, // push value
-			{OpCode: int(opcode.PushIdentifier), Args: []any{10.0}},
-			{OpCode: int(opcode.MulIdentifier)},
-			{OpCode: int(opcode.PrintIdentifier)},
+			{OpCode: int(misc.PushIdentifier), Args: []any{"value"}}, // push value
+			{OpCode: int(misc.PushIdentifier), Args: []any{10.0}},
+			{OpCode: int(math.MulIdentifier)},
+			{OpCode: int(misc.PrintIdentifier)},
 		},
 	}
 

@@ -43,7 +43,7 @@ func NewExecutor(funcs []types.AbstractFunction, inv types.Invocation) *Executor
 	return &Executor{
 		ctx:         ctx,
 		functions:   fnMap,
-		opcodeTable: opcode.OpCodeRegistry,
+		opcodeTable: opcode.Registry,
 	}
 }
 
