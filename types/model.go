@@ -29,3 +29,19 @@ type ExecutionContext struct {
 	Symbols map[string]any
 	PC      int
 }
+
+// SymboliaNumber is a type alias for float64, used to represent numeric values within the Symbolia context.
+type SymboliaNumber = float64
+
+// SymboliaString is a type alias for string, used to represent textual values within the Symbolia context.
+type SymboliaString = string
+
+// SymboliaBool is a type alias for the built-in boolean type, representing true or false values.
+type SymboliaBool = bool
+
+type SymboliaInteger = int
+
+// SymboliaType is a union type representing SymboliaNumber, SymboliaString, or SymboliaBool values.
+type SymboliaType interface {
+	~SymboliaNumber | ~SymboliaString | ~SymboliaBool
+}
